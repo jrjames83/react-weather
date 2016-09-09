@@ -2,10 +2,31 @@ var React = require('react');
 
 var About = (props) => {
 	return (
-		<div>
-		<h3>About The Weather App</h3>
-		<p> Welcome to the about page</p>
-		</div>
+	 <div>
+	 <h1 className="text-center">About This Site</h1>
+		<table>
+		  <thead>
+		    <tr>
+		      <th width="500">Technology</th>
+		      <th width="500">By</th>
+		      <th width="500">Description</th>
+		    </tr>
+		  </thead>
+		  <tbody>
+		    <tr>
+		      <td>ReactJS</td>
+		      <td><a href="https://github.com/reactjs">Facebook</a></td>
+		      <td>Library for user interfaces and mainly SPAs</td>
+		    </tr>
+		    <tr>
+		      <td>OpenWeatherMap</td>
+		      <td><a href="http://openweathermap.org/api">Open Weather Map</a></td>
+		      <td>Free JSON API to get Weather data</td>
+		    </tr>
+
+		  </tbody>
+	</table>
+  </div>
 		)
 };
 
