@@ -41,6 +41,26 @@ var Weather = React.createClass({
 
 
 	},
+
+	componentDidMount() {
+	    var location = this.props.location.query.location;
+	    if (location && location.length > 0) {
+	    	this.handleSearch(location);
+	    	window.location.hash = '#/';
+	    }  
+	},
+
+	// A parent can always update a child's props
+	//https://github.com/reactjs/react-router/issues/292
+	componentWillReceiveProps(nextProps) {
+	    // Handle the update from the window hash change on the nav form
+	    var location = nextProps.location.query.location;
+	    if (location && location.length > 0) {
+	    	this.handleSearch(location);
+	    	window.location.hash = '#/';
+	    }  	      
+	},
+
     render() {
     	var that = this;
     	var {isLoading, temp, location, errorMessage} = this.state;

@@ -24976,8 +24976,13 @@
 	    displayName: 'Nav',
 	    onSearch: function onSearch(e) {
 	        e.preventDefault();
-	        alert("not yet wired up");
-	        // do stuff later
+	        var location = this.refs.location.value;
+	        var encodedLocation = encodeURIComponent(location);
+
+	        if (location.length > 0) {
+	            this.refs.location.value = '';
+	            window.location.hash = '#/?location=' + encodedLocation;
+	        }
 	    },
 	    render: function render() {
 	        return React.createElement(
@@ -25035,7 +25040,7 @@
 	                        React.createElement(
 	                            'li',
 	                            null,
-	                            React.createElement('input', { type: 'search', placeholder: 'city' })
+	                            React.createElement('input', { type: 'search', placeholder: 'city', ref: 'location' })
 	                        ),
 	                        React.createElement(
 	                            'li',
@@ -25072,72 +25077,91 @@
 	*/
 
 	var Weather = React.createClass({
-	  displayName: 'Weather',
-	  getInitialState: function getInitialState() {
-	    return {
-	      isLoading: false,
-	      errorMessage: undefined
+		displayName: 'Weather',
+		getInitialState: function getInitialState() {
+			return {
+				isLoading: false,
+				errorMessage: undefined
 
-	    };
-	  },
-	  handleSearch: function handleSearch(location) {
-	    var that = this; // bind to handleSearch not the imported func
-	    this.setState({ isLoading: true });
-	    openWeatherMap.getTemp(location).then(function (temp) {
-	      that.setState({
-	        location: location,
-	        temp: temp,
-	        isLoading: false
-	      });
-	    }, function (e) {
-	      that.setState({
-	        isLoading: false,
-	        location: 'Did not find one',
-	        errorMessage: e.message // from the promise written in openweathermap.jsx
-	      });
-	    });
-	  },
-	  render: function render() {
-	    var that = this;
-	    var _state = this.state;
-	    var isLoading = _state.isLoading;
-	    var temp = _state.temp;
-	    var location = _state.location;
-	    var errorMessage = _state.errorMessage;
+			};
+		},
+		handleSearch: function handleSearch(location) {
+			var that = this; // bind to handleSearch not the imported func
+			this.setState({ isLoading: true });
+			openWeatherMap.getTemp(location).then(function (temp) {
+				that.setState({
+					location: location,
+					temp: temp,
+					isLoading: false
+				});
+			}, function (e) {
+				that.setState({
+					isLoading: false,
+					location: 'Did not find one',
+					errorMessage: e.message // from the promise written in openweathermap.jsx
+				});
+			});
+		},
+		componentDidMount: function componentDidMount() {
+			var location = this.props.location.query.location;
+			if (location && location.length > 0) {
+				this.handleSearch(location);
+				window.location.hash = '#/';
+			}
+		},
 
 
-	    function renderMessage() {
-	      if (isLoading) {
-	        return React.createElement(
-	          'h3',
-	          { className: 'text-center' },
-	          'Fetching weather....'
-	        );
-	      } else if (temp && location) {
-	        return React.createElement(WeatherMessage, { location: location, temp: temp });
-	      }
-	    }
+		// A parent can always update a child's props
+		//https://github.com/reactjs/react-router/issues/292
+		componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+			// Handle the update from the window hash change on the nav form
+			var location = nextProps.location.query.location;
+			if (location && location.length > 0) {
+				this.handleSearch(location);
+				window.location.hash = '#/';
+			}
+		},
+		render: function render() {
+			var that = this;
+			var _state = this.state;
+			var isLoading = _state.isLoading;
+			var temp = _state.temp;
+			var location = _state.location;
+			var errorMessage = _state.errorMessage;
 
-	    function renderError() {
-	      if (typeof errorMessage === 'string') {
 
-	        return React.createElement(ErrorModal, { message: errorMessage });
-	      }
-	    }
+			function renderMessage() {
+				if (isLoading) {
+					return React.createElement(
+						'h3',
+						{ className: 'text-center' },
+						'Fetching weather....'
+					);
+				} else if (temp && location) {
+					return React.createElement(WeatherMessage, { location: location, temp: temp });
+				}
+			}
 
-	    return React.createElement(
-	      'div',
-	      null,
-	      React.createElement(
-	        'h1',
-	        { className: 'text-center page-title' },
-	        'Get Weather'
-	      ),
-	      React.createElement(WeatherForm, { onSearch: this.handleSearch }),
-	      renderMessage(),
-	      renderError()
-	    );
-	  }
+			function renderError() {
+				if (typeof errorMessage === 'string') {
+
+					return React.createElement(ErrorModal, { message: errorMessage });
+				}
+			}
+
+			return React.createElement(
+				'div',
+				null,
+				React.createElement(
+					'h1',
+					{ className: 'text-center page-title' },
+					'Get Weather'
+				),
+				React.createElement(WeatherForm, { onSearch: this.handleSearch }),
+				renderMessage(),
+				renderError()
+			);
+		}
 	});
 
 	module.exports = Weather;
@@ -25167,7 +25191,7 @@
 	            React.createElement(
 	                'form',
 	                { onSubmit: this.onFormSubmit },
-	                React.createElement('input', { type: 'text', placeholder: 'Get Weather', ref: 'location' }),
+	                React.createElement('input', { type: 'search', placeholder: 'Get Weather', ref: 'location' }),
 	                React.createElement(
 	                    'button',
 	                    { className: 'button expanded hollow' },
